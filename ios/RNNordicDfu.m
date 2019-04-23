@@ -1,6 +1,6 @@
 #import "RNNordicDfu.h"
-#import <iOSDFULibrary/iOSDFULibrary-Swift.h>
 #import <CoreBluetooth/CoreBluetooth.h>
+@import iOSDFULibrary;
 
 static CBCentralManager * (^getCentralManager)();
 static void (^onDFUComplete)();
@@ -114,8 +114,8 @@ NSString * const DFUStateChangedEvent = @"DFUStateChanged";
       return @"DFUErrorRemoteButtonlessDFUOperationFailed";
     case DFUErrorRemoteSecureDFUInsufficientResources:
       return @"DFUErrorRemoteSecureDFUInsufficientResources";
-    case DFUErrorRemoteSecureDFUOperationNotpermitted:
-      return @"DFUErrorRemoteSecureDFUOperationNotpermitted";
+    case DFUErrorRemoteSecureDFUOperationNotPermitted:
+      return @"DFUErrorRemoteSecureDFUOperationNotPermitted";
     case DFUErrorRemoteButtonlessDFUOpCodeNotSupported:
       return @"DFUErrorRemoteButtonlessDFUOpCodeNotSupported";
     case DFUErrorRemoteExperimentalButtonlessDFUSuccess:
