@@ -55,6 +55,7 @@ public class RNNordicDfuModule extends ReactContextBaseJavaModule implements Lif
         WritableMap map = new WritableNativeMap();
         map.putString("deviceAddress", address);
         promise.resolve(map);
+        controller.abort();
     }
 
     @Override
