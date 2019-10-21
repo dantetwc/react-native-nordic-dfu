@@ -197,6 +197,9 @@ RCT_EXPORT_METHOD(startDFU:(NSString *)deviceAddress
   } else {
     CBCentralManager * centralManager = getCentralManager();
 
+    // Temporary fix for iOS 13
+    [NSThread sleepForTimeInterval: 2];
+
     if (!centralManager) {
       reject(@"nil_central_manager", @"Call to getCentralManager returned nil", nil);
     } else if (!deviceAddress) {
@@ -245,6 +248,9 @@ RCT_EXPORT_METHOD(switchToDFU:(NSString *)deviceAddress
         reject(@"nil_central_manager_getter", @"Attempted to start DFU without central manager getter", nil);
     } else {
         CBCentralManager * centralManager = getCentralManager();
+
+        // Temporary fix for iOS 13
+        [NSThread sleepForTimeInterval: 2];
         
         if (!centralManager) {
             reject(@"nil_central_manager", @"Call to getCentralManager returned nil", nil);
