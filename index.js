@@ -60,8 +60,8 @@ function switchToDFU({ deviceAddress, deviceName = null, filePath }) {
     return rejectPromise("No filePath defined");
   }
   const upperDeviceAddress = deviceAddress.toUpperCase();
-   RNNordicDfu.switchToDFU(upperDeviceAddress, deviceName, filePath);
-   return resolvePromise()
+   
+   return RNNordicDfu.switchToDFU(upperDeviceAddress, deviceName, filePath);
 }
 
 /**

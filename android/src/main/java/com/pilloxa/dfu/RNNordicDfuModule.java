@@ -19,6 +19,7 @@ public class RNNordicDfuModule extends ReactContextBaseJavaModule implements Lif
     public static final String LOG_TAG = name;
     private final ReactApplicationContext reactContext;
     private Promise mPromise = null;
+    private static String switchAddress;
 
     public RNNordicDfuModule(ReactApplicationContext reactContext) {
         super(reactContext);
@@ -44,6 +45,7 @@ public class RNNordicDfuModule extends ReactContextBaseJavaModule implements Lif
 
     @ReactMethod
     public void switchToDFU(String address, String name, String filePath, Promise promise) {
+        switchAddress = address;
         final DfuServiceInitiator starter = new DfuServiceInitiator(address)
                 .setKeepBond(false);
         if (name != null) {
@@ -52,10 +54,10 @@ public class RNNordicDfuModule extends ReactContextBaseJavaModule implements Lif
         starter.setUnsafeExperimentalButtonlessServiceInSecureDfuEnabled(true);
         starter.setZip(filePath);
         final DfuServiceController controller = starter.start(this.reactContext, DfuService.class);
-        WritableMap map = new WritableNativeMap();
+        WritableMap map =  Arguments.createMap();
         map.putString("deviceAddress", address);
-        promise.resolve(map);
         controller.abort();
+        promise.resolve(map);
     }
 
     @Override
@@ -71,6 +73,8 @@ public class RNNordicDfuModule extends ReactContextBaseJavaModule implements Lif
     }
 
     private void sendStateUpdate(String state, String deviceAddress) {
+        Log.d(LOG_TAG, "Update Address: "+deviceAddress +" switchAddress:"+switchAddress);
+
         WritableMap map = new WritableNativeMap();
         Log.d(LOG_TAG, "State: " + state);
         map.putString("state", state);
@@ -106,31 +110,54 @@ public class RNNordicDfuModule extends ReactContextBaseJavaModule implements Lif
     private final DfuProgressListener mDfuProgressListener = new DfuProgressListenerAdapter() {
         @Override
         public void onDeviceConnecting(final String deviceAddress) {
+            if (switchAddress.equals(deviceAddress)) {
+                return;
+            }
+
             sendStateUpdate("CONNECTING", deviceAddress);
         }
 
         @Override
         public void onDfuProcessStarting(final String deviceAddress) {
+            if (switchAddress.equals(deviceAddress)) {
+                return;
+            }
+
             sendStateUpdate("DFU_PROCESS_STARTING", deviceAddress);
         }
 
         @Override
         public void onEnablingDfuMode(final String deviceAddress) {
+            if (switchAddress.equals(deviceAddress)) {
+                return;
+            }
+
             sendStateUpdate("ENABLING_DFU_MODE", deviceAddress);
         }
 
         @Override
         public void onFirmwareValidating(final String deviceAddress) {
+            if (switchAddress.equals(deviceAddress)) {
+                return;
+            }
+
             sendStateUpdate("FIRMWARE_VALIDATING", deviceAddress);
         }
 
         @Override
         public void onDeviceDisconnecting(final String deviceAddress) {
+            if (switchAddress.equals(deviceAddress)) {
+                return;
+            }
             sendStateUpdate("DEVICE_DISCONNECTING", deviceAddress);
         }
 
         @Override
         public void onDfuCompleted(final String deviceAddress) {
+            if (switchAddress.equals(deviceAddress)) {
+                return;
+            }
+
             if (mPromise != null) {
                 WritableMap map = new WritableNativeMap();
                 map.putString("deviceAddress", deviceAddress);
@@ -154,6 +181,9 @@ public class RNNordicDfuModule extends ReactContextBaseJavaModule implements Lif
 
         @Override
         public void onDfuAborted(final String deviceAddress) {
+            if (switchAddress.equals(deviceAddress)) {
+                return;
+            }
             sendStateUpdate("DFU_ABORTED", deviceAddress);
             if (mPromise != null) {
                 mPromise.reject("2", "DFU ABORTED");
@@ -177,6 +207,9 @@ public class RNNordicDfuModule extends ReactContextBaseJavaModule implements Lif
 
         @Override
         public void onError(final String deviceAddress, final int error, final int errorType, final String message) {
+            if (switchAddress.equals(deviceAddress)) {
+                return;
+            }
             sendStateUpdate("DFU_FAILED", deviceAddress);
             if (mPromise != null) {
                 mPromise.reject(Integer.toString(error), message);
